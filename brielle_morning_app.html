@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Brielle · FSE">
+<meta name="theme-color" content="#f5f0e8">
+<title>Brielle · Feminine Strength</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#f5f0e8;font-family:'DM Sans',system-ui,sans-serif;color:#2c2416;max-width:480px;margin:0 auto;min-height:100vh}
+::-webkit-scrollbar{display:none}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]{-moz-appearance:textfield}
+
+.header{padding:36px 20px 24px;border-bottom:1px solid #e8e2d9}
+.header-eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8a7f74;margin-bottom:8px}
+.header-title{font-family:Georgia,serif;font-size:28px;font-weight:400;line-height:1.2;color:#2c2416}
+.header-title em{font-style:italic;color:#7a8c6e}
+.header-date{margin-top:6px;font-size:13px;color:#8a7f74;font-weight:300}
+
+.tabs{display:flex;overflow-x:auto;border-bottom:1px solid #e8e2d9;padding:0 20px;scrollbar-width:none}
+.tab-btn{background:none;border:none;padding:12px 0 14px;margin-right:20px;font-family:inherit;font-size:13px;font-weight:400;color:#8a7f74;cursor:pointer;white-space:nowrap;position:relative;flex-shrink:0}
+.tab-btn.active{color:#2c2416;font-weight:500}
+.tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#7a8c6e}
+
+.tab-content{display:none;padding-bottom:40px}
+.tab-content.active{display:block}
+
+.section-pad{padding:28px 20px 0}
+.pad{padding:0 20px}
+
+.tag{display:inline-block;background:#e8e2d9;color:#8a7f74;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px}
+.body-text{font-size:14px;line-height:1.7;color:#8a7f74}
+
+.card{background:#faf8f4;border:1px solid #e8e2d9;border-radius:16px;padding:20px;margin-bottom:12px}
+.info-card{background:#f5f0e8;border-radius:10px;padding:14px;margin-bottom:8px}
+.info-title{font-size:12px;font-weight:500;color:#2c2416;margin-bottom:6px}
+.info-body{font-size:12px;color:#8a7f74;line-height:1.65}
+
+.progress-bar-wrap{height:4px;background:#e8e2d9;border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+
+.block-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#b8a99a;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.block-label-line{flex:1;height:1px;background:#e8e2d9}
+
+.check-item{display:flex;align-items:center;gap:16px;background:#faf8f4;border:1px solid #e8e2d9;border-radius:14px;padding:16px 18px;cursor:pointer;position:relative;overflow:hidden;transition:opacity .2s;margin-bottom:10px}
+.check-item.done{opacity:.65}
+.check-item-bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:#e8e2d9;transition:background .2s}
+.check-item.done .check-item-bar{background:#7a8c6e}
+.check-icon{font-size:22px;width:32px;text-align:center;flex-shrink:0}
+.check-info{flex:1}
+.check-name{font-size:15px;font-weight:500;color:#2c2416}
+.check-note{font-size:12px;color:#8a7f74;margin-top:2px;line-height:1.4}
+.circle{width:26px;height:26px;border-radius:50%;border:1.5px solid #e8e2d9;background:#f5f0e8;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;flex-shrink:0;transition:all .2s}
+.circle.done{background:#7a8c6e;border-color:#7a8c6e;color:white}
+
+.action-btn{width:100%;background:#2c2416;color:#f5f0e8;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;font-weight:500;letter-spacing:.04em;cursor:pointer;margin-top:4px}
+.sec-btn{width:100%;background:none;color:#8a7f74;border:1px solid #e8e2d9;border-radius:10px;padding:12px;font-family:inherit;font-size:13px;cursor:pointer;margin-top:6px}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-box{background:#f5f0e8;border-radius:10px;padding:11px 12px;text-align:center}
+.stat-val{font-family:Georgia,serif;font-size:20px;font-weight:500}
+.stat-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#b8a99a;margin-top:2px}
+
+.input-field{width:100%;background:#f5f0e8;border:1px solid #e8e2d9;border-radius:8px;padding:9px 10px;font-family:inherit;font-size:14px;color:#2c2416}
+.input-label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#b8a99a;margin-bottom:5px}
+.input-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.input-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+
+.ex-item{background:#faf8f4;border:1px solid #e8e2d9;border-radius:14px;overflow:hidden;position:relative;margin-bottom:8px;transition:opacity .2s}
+.ex-item.done{opacity:.55}
+.ex-bar{position:absolute;left:0;top:0;bottom:0;width:3px;background:#e8e2d9}
+.ex-item.done .ex-bar{background:#7a8c6e}
+.ex-header{display:flex;align-items:center;padding:12px 14px 12px 18px;gap:10px;cursor:pointer}
+.ex-name{font-size:14px;font-weight:500;color:#2c2416;line-height:1.3}
+.ex-sets{font-size:12px;color:#c4813a;font-weight:500;margin-top:2px}
+.ex-info{flex:1}
+.ex-wt{width:58px;background:#f5f0e8;border:1px solid #e8e2d9;border-radius:8px;padding:5px 6px;font-family:inherit;font-size:13px;color:#2c2416;text-align:center}
+.ex-check{width:28px;height:28px;border-radius:50%;border:1.5px solid #e8e2d9;background:#f5f0e8;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;cursor:pointer;flex-shrink:0;transition:all .2s}
+.ex-check.done{background:#7a8c6e;border-color:#7a8c6e;color:white}
+.ex-cue{padding:8px 14px 12px 18px;border-top:1px solid #e8e2d9;font-size:12px;line-height:1.65;color:#8a7f74;display:none}
+.ex-cue.open{display:block}
+
+.wo-selector{display:flex;gap:6px;flex-wrap:wrap;padding:16px 20px 0}
+.wo-btn{background:#faf8f4;border:1.5px solid #e8e2d9;border-radius:12px;padding:8px 12px;text-align:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.wo-btn.active{background:#2c2416;border-color:#2c2416}
+.wo-btn-label{font-size:12px;font-weight:500;color:#2c2416;line-height:1.2}
+.wo-btn.active .wo-btn-label{color:#f5f0e8}
+.wo-btn-sub{font-size:10px;color:#8a7f74}
+.wo-btn.active .wo-btn-sub{color:#b8a99a}
+
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px}
+.week-day{aspect-ratio:1;border-radius:8px;background:#e8e2d9;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1.5px solid transparent}
+.week-day.walked{background:#7a8c6e}
+.week-day.today{border-color:#c4813a}
+.week-day-lbl{font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#8a7f74}
+.week-day.walked .week-day-lbl{color:rgba(255,255,255,.75)}
+.week-day-check{font-size:12px;color:white}
+
+.countdown-box{margin:16px 20px 0;background:#2c2416;border-radius:14px;padding:16px 18px;color:#f5f0e8;display:flex;align-items:center;gap:16px}
+.countdown-num{font-family:Georgia,serif;font-size:44px;color:#c4813a;line-height:1}
+.countdown-label{font-size:15px;font-weight:500}
+.countdown-sub{font-size:12px;color:#b8a99a;margin-top:3px;line-height:1.5}
+
+.sched-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #e8e2d9;align-items:center}
+.sched-day{font-size:12px;font-weight:500;color:#2c2416;width:56px;flex-shrink:0}
+.sched-badge{font-size:11px;padding:2px 8px;border-radius:10px;flex-shrink:0}
+.sched-badge.christin{background:#e8f0e4;color:#4a5e3e}
+.sched-badge.solo{background:#e8e2d9;color:#8a7f74}
+.sched-badge.rest{background:#f5f0e8;color:#b8a99a}
+.sched-focus{font-size:12px;color:#8a7f74}
+
+.note-bar{background:#f5f0e8;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#8a7f74;line-height:1.5;border-left:3px solid #c4813a}
+
+.progress-row{display:flex;justify-content:space-between;font-size:11px;color:#8a7f74;margin-bottom:4px}
+.progress-row span:first-child{font-weight:500;color:#2c2416}
+
+.journey-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #e8e2d9}
+.journey-label{font-size:13px;color:#8a7f74;width:110px}
+.journey-start{font-size:12px;color:#8a7f74}
+.journey-now{font-size:13px;font-weight:500;color:#2c2416}
+.journey-change{font-size:12px;font-weight:500;color:#7a8c6e}
+
+.lift-card{background:#faf8f4;border:1px solid #e8e2d9;border-radius:16px;padding:20px;margin-bottom:14px}
+.lift-name{font-family:Georgia,serif;font-size:18px;color:#2c2416;margin-bottom:4px}
+.lift-note{font-size:12px;color:#8a7f74;margin-bottom:12px;line-height:1.4}
+.lift-badge{font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#e8e2d9;color:#8a7f74;padding:3px 9px;border-radius:12px}
+.lift-recent{margin-top:12px;border-top:1px solid #e8e2d9;padding-top:10px}
+.lift-recent-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#b8a99a;margin-bottom:6px}
+.lift-recent-row{display:flex;justify-content:space-between;font-size:12px;color:#8a7f74;padding:3px 0}
+.lift-recent-row span:first-child{font-weight:500;color:#2c2416}
+
+.habit-item{display:flex;align-items:center;gap:12px;background:#f5f0e8;border-radius:10px;padding:11px 13px;cursor:pointer;transition:opacity .2s;margin-bottom:8px}
+.habit-item.done{opacity:.55}
+.habit-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.habit-name{font-size:13px;color:#2c2416}
+.habit-detail{font-size:11px;color:#8a7f74}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Feminine Strength · Brielle</div>
+  <div class="header-title">Show up for <em>yourself</em> — before the world.</div>
+  <div class="header-date" id="todayStr"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('morning')">Morning</button>
+  <button class="tab-btn" onclick="showTab('nutrition')">Nutrition</button>
+  <button class="tab-btn" onclick="showTab('solo')">Solo</button>
+  <button class="tab-btn" onclick="showTab('walk')">Walk</button>
+  <button class="tab-btn" onclick="showTab('progress')">Progress</button>
+</div>
+
+<!-- ══ MORNING TAB ══════════════════════════════════════ -->
+<div id="tab-morning" class="tab-content active">
+  <div class="section-pad">
+    <div class="tag">First thing · every day</div>
+    <p class="body-text">Before the business, before the clients, before everything else. This is yours. Start from a full place.</p>
+  </div>
+  <div id="countdown-box" class="countdown-box">
+    <div class="countdown-num" id="days-left">—</div>
+    <div>
+      <div class="countdown-label">days until June 8</div>
+      <div class="countdown-sub">Your birthday. Keep going — it's working.</div>
+    </div>
+  </div>
+  <div style="padding:16px 20px 4px">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="morning-bar" style="width:0%;background:#7a8c6e"></div></div>
+    <div style="font-size:11px;color:#8a7f74;margin-top:6px" id="morning-count">0 of 5 done</div>
+  </div>
+  <div style="padding:8px 20px 0" id="morning-list"></div>
+  <div class="pad" style="margin-top:20px">
+    <div class="block-label">Pre-training fuel <div class="block-label-line"></div></div>
+    <div class="info-card"><div class="info-title">🍌 Training day (Mon + Tue)</div><div class="info-body">Dates or a banana 30–45 min before. Quick carbs = better output on heavy sets. Your hip thrust needs fuel.</div></div>
+    <div class="info-card"><div class="info-title">☕ Non-training day</div><div class="info-body">Coffee is fine first. Walk fasted if you can — you're tapping fat stores directly.</div></div>
+    <div class="info-card"><div class="info-title">🌙 The night before</div><div class="info-body">Protein at dinner, in bed at a reasonable hour. Recovery happens while you sleep — not in the gym.</div></div>
+  </div>
+</div>
+
+<!-- ══ NUTRITION TAB ══════════════════════════════════════ -->
+<div id="tab-nutrition" class="tab-content">
+  <div class="section-pad">
+    <div class="tag">Fat loss · muscle preservation</div>
+    <p class="body-text">Clean food, consistent portions. You're averaging 1+ lb/week — right in the sweet spot. We're changing your shape, not just your weight.</p>
+  </div>
+  <div class="pad" style="margin-top:20px">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-family:Georgia,serif;font-size:18px;color:#2c2416">Daily targets</span>
+        <span style="font-size:11px;letter-spacing:.08em;background:#fde8d0;color:#9b5e1a;padding:3px 10px;border-radius:20px">~1,400 kcal</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-val" style="color:#7a8c6e">130g</div><div class="stat-lbl">Protein</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:#c4813a">170g</div><div class="stat-lbl">Carbs</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:#b8a99a">60g</div><div class="stat-lbl">Fat</div></div>
+        <div class="stat-box"><div class="stat-val" style="color:#4a5e3e">25g+</div><div class="stat-lbl">Fiber</div></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="progress-row"><span>Calories today</span><span id="cal-display">0 / 1400</span></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="cal-bar" style="width:0%;background:#2c2416"></div></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="progress-row"><span>Protein today</span><span id="prot-display">0g / 130g</span></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prot-bar" style="width:0%;background:#7a8c6e"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div class="progress-row"><span>Carbs today</span><span id="carb-display">0g / 170g</span></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="carb-bar" style="width:0%;background:#c4813a"></div></div>
+      </div>
+      <div class="input-grid">
+        <div><label class="input-label">Calories</label><input type="number" id="log-cal" placeholder="0" class="input-field" oninput="updateNutrition()"></div>
+        <div><label class="input-label">Protein (g)</label><input type="number" id="log-prot" placeholder="0" class="input-field" oninput="updateNutrition()"></div>
+        <div><label class="input-label">Carbs (g)</label><input type="number" id="log-carb" placeholder="0" class="input-field" oninput="updateNutrition()"></div>
+      </div>
+      <button class="action-btn" onclick="saveNutrition()">Save Today's Numbers</button>
+    </div>
+    <div class="block-label" style="margin-bottom:12px">Carb boosts — no extra volume <div class="block-label-line"></div></div>
+    <div class="info-card"><div class="info-title">🍯 Honey on oatmeal</div><div class="info-body">1 tbsp = ~17g carbs. Drizzle it in — no extra fullness.</div></div>
+    <div class="info-card"><div class="info-title">🍌 Banana</div><div class="info-body">~27g carbs. Easy grab before training or as a snack.</div></div>
+    <div class="info-card"><div class="info-title">🌴 2–3 dates</div><div class="info-body">~35–40g carbs. Tiny volume, big carb hit. Great pre-workout.</div></div>
+    <div class="info-card"><div class="info-title">🍚 Extra white rice</div><div class="info-body">Already in your meals — slightly bigger portion adds 15–20g.</div></div>
+    <div class="block-label" style="margin-top:16px;margin-bottom:12px">Daily habits <div class="block-label-line"></div></div>
+    <div id="habit-list"></div>
+    <div class="block-label" style="margin-top:16px;margin-bottom:12px">Why this rate of loss matters <div class="block-label-line"></div></div>
+    <div class="info-card"><div class="info-title">📊 ~1+ lb/week — ideal range</div><div class="info-body">Healthy sustainable fat loss is 0.5–1 lb/week. You're right there. Faster means losing muscle — including in your glutes.</div></div>
+    <div class="info-card"><div class="info-title">💪 Muscle is going UP while weight goes DOWN</div><div class="info-body">That's body recomposition. It's rare. It means the training and the food are working together exactly right.</div></div>
+    <div class="info-card"><div class="info-title">🍑 Losing muscle = losing booty</div><div class="info-body">This is why we don't slash calories aggressively. Your glute development depends on preserving muscle while fat comes off.</div></div>
+    <div class="info-card"><div class="info-title">📋 May 12 body scan</div><div class="info-body">Weight: 195.6 lbs · Body Fat: 45.5% · Skeletal Muscle: 30.1% (↑) · Visceral Fat: 17 (↓) · BMR: 1,413 kcal</div></div>
+  </div>
+</div>
+
+<!-- ══ SOLO TAB ══════════════════════════════════════ -->
+<div id="tab-solo" class="tab-content">
+  <div style="padding:20px 20px 0">
+    <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a7f74;margin-bottom:10px">Weekly schedule</div>
+    <div class="sched-row"><div class="sched-day">Mon</div><span class="sched-badge christin">With Christin</span><div class="sched-focus">Upper Body + Core</div></div>
+    <div class="sched-row"><div class="sched-day">Tue</div><span class="sched-badge christin">With Christin</span><div class="sched-focus">Glutes + Lower Body</div></div>
+    <div class="sched-row"><div class="sched-day">Wed/Thu</div><span class="sched-badge solo">Solo</span><div class="sched-focus">Day D — Glute Growth</div></div>
+    <div class="sched-row"><div class="sched-day">Fri/Sat</div><span class="sched-badge solo">Solo</span><div class="sched-focus">Day C or E</div></div>
+    <div class="sched-row" style="border-bottom:none"><div class="sched-day">Sun</div><span class="sched-badge rest">Rest</span><div class="sched-focus">Or a walk</div></div>
+  </div>
+  <div class="wo-selector" id="wo-selector"></div>
+  <div style="padding:16px 20px 0" id="wo-detail"></div>
+</div>
+
+<!-- ══ WALK TAB ══════════════════════════════════════ -->
+<div id="tab-walk" class="tab-content">
+  <div class="section-pad">
+    <div class="tag">3x per week · fat loss baseline</div>
+    <p class="body-text">Consistent 3 days gives us clean data. When progress stalls — that's when we add more. Hold the line and let the numbers talk.</p>
+  </div>
+  <div class="pad" style="margin-top:20px">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;background:#f5f0e8;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+        <div style="font-family:Georgia,serif;font-size:36px;color:#c4813a;line-height:1" id="streak-num">0</div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:#2c2416" id="streak-label">Start your streak</div>
+          <div style="font-size:12px;color:#8a7f74" id="walk-total">0 total walks logged</div>
+        </div>
+      </div>
+      <div class="week-grid" id="week-grid"></div>
+      <button class="action-btn" id="walk-btn" onclick="toggleTodayWalk()">Log Today's Walk</button>
+    </div>
+    <div class="block-label" style="margin-bottom:12px">Why this works <div class="block-label-line"></div></div>
+    <div class="info-card"><div class="info-title">🔥 Visceral fat comes off first</div><div class="info-body">Your visceral fat went from 18 to 17 in 6 weeks. Consistent walking — especially fasted — directly targets this. Keep going.</div></div>
+    <div class="info-card"><div class="info-title">📊 Clean data = smart decisions</div><div class="info-body">Holding 3 walks/week steady means we know exactly what's working. If progress slows — we add a walk before we touch calories.</div></div>
+    <div class="info-card"><div class="info-title">💪 Walking doesn't touch muscle</div><div class="info-body">Zone 2 walking burns fat without touching your muscle tissue. Strength training builds it — walks burn fat around it. Perfect together.</div></div>
+    <div class="info-card"><div class="info-title">🧠 Cortisol matters</div><div class="info-body">You run your own business. Your schedule is full. A quiet morning walk lowers cortisol rather than spiking it. That matters more than people realize for fat loss.</div></div>
+  </div>
+</div>
+
+<!-- ══ PROGRESS TAB ══════════════════════════════════════ -->
+<div id="tab-progress" class="tab-content">
+  <div class="section-pad">
+    <div class="tag">March 23 → today</div>
+    <p class="body-text">Every number moving in the right direction. Smooth, steady, real. This is what consistency looks like.</p>
+  </div>
+  <div class="pad" style="margin-top:16px">
+    <div class="card">
+      <div style="font-family:Georgia,serif;font-size:17px;color:#2c2416;margin-bottom:14px">Body composition journey</div>
+      <div class="journey-row"><div class="journey-label">Weight</div><div class="journey-start">204.0 lbs</div><div class="journey-now">195.6 lbs</div><div class="journey-change">▼ 8.4 lbs</div></div>
+      <div class="journey-row"><div class="journey-label">Body fat</div><div class="journey-start">47.5%</div><div class="journey-now">45.5%</div><div class="journey-change">▼ 2.0 pts</div></div>
+      <div class="journey-row"><div class="journey-label">Sub. fat</div><div class="journey-start">86.6 lbs</div><div class="journey-now">79.6 lbs</div><div class="journey-change">▼ 7 lbs fat</div></div>
+      <div class="journey-row"><div class="journey-label">Skeletal muscle</div><div class="journey-start">29.0%</div><div class="journey-now">30.1%</div><div class="journey-change">▲ 1.1 pts</div></div>
+      <div class="journey-row"><div class="journey-label">Visceral fat</div><div class="journey-start">18</div><div class="journey-now">17</div><div class="journey-change">▼ 1 point</div></div>
+      <div class="journey-row" style="border-bottom:none"><div class="journey-label">Hip thrust</div><div class="journey-start">165 lbs</div><div class="journey-now">205 lbs</div><div class="journey-change" style="color:#c4813a">▲ 40 lbs</div></div>
+    </div>
+    <div style="background:#2c2416;border-radius:14px;padding:18px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px">
+      <div style="font-family:Georgia,serif;font-size:44px;color:#c4813a;line-height:1" id="progress-days">—</div>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:#f5f0e8">days until June 8</div>
+        <div style="font-size:12px;color:#b8a99a;margin-top:3px;line-height:1.5">At current rate — another 3–4 lbs possible. Keep showing up.</div>
+      </div>
+    </div>
+    <div class="block-label" style="margin-bottom:12px">Lift tracker <div class="block-label-line"></div></div>
+    <div id="lift-tracker"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────
+const SK = 'brielle_v3';
+function load() { try { return JSON.parse(localStorage.getItem(SK)) || {}; } catch { return {}; } }
+function save(s) { try { localStorage.setItem(SK, JSON.stringify(s)); } catch {} }
+
+let state = load();
+const todayKey = new Date().toDateString();
+
+// Daily reset
+if (state.lastDay !== todayKey) {
+  state.morningChecked = {};
+  state.habitChecked = {};
+  state.nutrition = {};
+  state.exChecked = {};
+  state.lastDay = todayKey;
+  save(state);
+}
+
+// ── DATE HELPERS ──────────────────────────────────
+document.getElementById('todayStr').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+function daysUntil(dateStr) {
+  return Math.max(0, Math.ceil((new Date(dateStr) - new Date()) / (1000*60*60*24)));
+}
+const dl = daysUntil('2026-06-08');
+document.getElementById('days-left').textContent = dl;
+document.getElementById('progress-days').textContent = dl;
+
+// ── MORNING ───────────────────────────────────────
+const MORNING_ITEMS = [
+  { id:'water', icon:'💧', name:'16–20 oz Water', note:'Before coffee, before food. Rehydrate from overnight.' },
+  { id:'protein', icon:'🥩', name:'Protein at breakfast', note:'Hit 30–35g before anything else. Sets the tone for 120g.' },
+  { id:'walk', icon:'🚶‍♀️', name:'Walk today?', note:'Target 3x per week — consistent is everything.' },
+  { id:'weigh', icon:'⚖️', name:'Weigh in', note:'First thing. Before eating or drinking. Data is power.' },
+  { id:'log', icon:'📋', name:'Log food today', note:'Track it. You can\'t manage what you don\'t measure.' },
+];
+
+function renderMorning() {
+  const list = document.getElementById('morning-list');
+  const checked = state.morningChecked || {};
+  list.innerHTML = '';
+  MORNING_ITEMS.forEach(item => {
+    const done = !!checked[item.id];
+    const div = document.createElement('div');
+    div.className = 'check-item' + (done ? ' done' : '');
+    div.onclick = () => {
+      state.morningChecked = state.morningChecked || {};
+      state.morningChecked[item.id] = !state.morningChecked[item.id];
+      save(state);
+      renderMorning();
+    };
+    div.innerHTML = `<div class="check-item-bar"></div><div class="check-icon">${item.icon}</div><div class="check-info"><div class="check-name">${item.name}</div><div class="check-note">${item.note}</div></div><div class="circle ${done?'done':''}">✓</div>`;
+    list.appendChild(div);
+  });
+  const doneCount = MORNING_ITEMS.filter(i => (state.morningChecked||{})[i.id]).length;
+  document.getElementById('morning-bar').style.width = (doneCount/MORNING_ITEMS.length*100) + '%';
+  document.getElementById('morning-count').textContent = `${doneCount} of ${MORNING_ITEMS.length} done`;
+}
+renderMorning();
+
+// ── NUTRITION ─────────────────────────────────────
+const HABITS = [
+  { id:'h_prot', icon:'🥩', name:'Hit 120g+ protein', detail:'Spread across meals — don\'t leave it to dinner' },
+  { id:'h_water', icon:'💧', name:'Drink 80+ oz water', detail:'Hunger is often thirst. Stay ahead of it.' },
+  { id:'h_carb', icon:'🍌', name:'Carb boost today', detail:'Honey, banana, dates — close the gap without extra volume' },
+  { id:'h_veg', icon:'🥦', name:'Veggies at 2+ meals', detail:'Volume, fiber, satiety — the trifecta' },
+  { id:'h_sleep', icon:'🌙', name:'In bed by 10pm', detail:'Poor sleep tanks fat loss and spikes hunger hormones' },
+  { id:'h_mind', icon:'🧠', name:'No mindless eating', detail:'Ate intentionally — sat down, plated, present' },
+];
+
+function renderHabits() {
+  const list = document.getElementById('habit-list');
+  const checked = state.habitChecked || {};
+  list.innerHTML = '';
+  HABITS.forEach(h => {
+    const done = !!checked[h.id];
+    const div = document.createElement('div');
+    div.className = 'habit-item' + (done ? ' done' : '');
+    div.onclick = () => {
+      state.habitChecked = state.habitChecked || {};
+      state.habitChecked[h.id] = !state.habitChecked[h.id];
+      save(state);
+      renderHabits();
+    };
+    div.innerHTML = `<div class="habit-icon">${h.icon}</div><div style="flex:1"><div class="habit-name">${h.name}</div><div class="habit-detail">${h.detail}</div></div><div class="circle ${done?'done':''}">✓</div>`;
+    list.appendChild(div);
+  });
+}
+renderHabits();
+
+function updateNutrition() {
+  const cal = parseInt(document.getElementById('log-cal').value)||0;
+  const prot = parseInt(document.getElementById('log-prot').value)||0;
+  const carb = parseInt(document.getElementById('log-carb').value)||0;
+  document.getElementById('cal-display').textContent = `${cal} / 1400`;
+  document.getElementById('prot-display').textContent = `${prot}g / 130g`;
+  document.getElementById('carb-display').textContent = `${carb}g / 170g`;
+  document.getElementById('cal-bar').style.width = Math.min(100, cal/1400*100) + '%';
+  document.getElementById('prot-bar').style.width = Math.min(100, prot/130*100) + '%';
+  document.getElementById('carb-bar').style.width = Math.min(100, carb/170*100) + '%';
+}
+function saveNutrition() {
+  const cal = document.getElementById('log-cal').value;
+  const prot = document.getElementById('log-prot').value;
+  const carb = document.getElementById('log-carb').value;
+  state.nutrition = { calories: cal, protein: prot, carbs: carb };
+  save(state);
+}
+// Restore saved
+if (state.nutrition) {
+  if (state.nutrition.calories) document.getElementById('log-cal').value = state.nutrition.calories;
+  if (state.nutrition.protein) document.getElementById('log-prot').value = state.nutrition.protein;
+  if (state.nutrition.carbs) document.getElementById('log-carb').value = state.nutrition.carbs;
+  updateNutrition();
+}
+
+// ── SOLO WORKOUTS ─────────────────────────────────
+const WORKOUTS = [
+  {
+    id:'dayD', label:'Day D', sub:'Glute Growth', day:'Wed / Thu',
+    title:'Glute Growth',
+    subtitle:'Upper shelf · lower sweep · side shelf · deep stretch. Every angle. This is the birthday session.',
+    duration:'~50 min', note:'Most important solo day. Do not skip it.',
+    blocks:[
+      { name:'Warm-up', exs:[
+        { n:'Banded Glute Bridge', s:'2x20', c:'Band above knees, drive knees out. Activate before you load. Don\'t skip this.' },
+      ]},
+      { name:'Main glute work', exs:[
+        { n:'Single Leg BB Hip Thrust', s:'4x10/side', c:'Drive through heel — 2-sec hold and squeeze at the top. Full lockout every rep. This builds the upper shelf.' },
+        { n:'Cable Kickback — High Cable', s:'3x15/side', c:'Full hip extension — squeeze upper glute hard at the top. Slow controlled return.' },
+        { n:'Cable Step Up / Step Down', s:'3x12/side', c:'Cable at ankle. Step up slow, lower controlled. Constant tension that bodyweight doesn\'t have.' },
+        { n:'Deficit Elevated Sumo Squat', s:'4x12', c:'Plates under feet — deep stretch at the bottom. Drive knees out. This deep range is where glute growth happens.' },
+        { n:'B-Stance RDL', s:'3x10/side', c:'3-sec lower — feel the hamstring and lower glute stretch. Back foot is just for balance. Drive hips through at top.' },
+        { n:'Feet Elevated Single Leg Bridge', s:'3x15/side', c:'Foot on bench — drive hips up, squeeze hard at the top. Full lockout. Works glute at a longer muscle length.' },
+        { n:'Seated Hip Abduction', s:'3x20', c:'Slow tempo — constant tension on glute med the whole set. This is the side shelf. Do not rush it.' },
+      ]},
+    ],
+  },
+  {
+    id:'dayC', label:'Day C', sub:'Upper Body', day:'Fri / Sat',
+    title:'Upper Body — Gym Only',
+    subtitle:'Barbell first · Dumbbells · Cables at the end. Nothing repeated from Monday with Christin.',
+    duration:'~45 min', note:'Set up at the barbell, move to DBs, finish all cables together — no jumping around.',
+    blocks:[
+      { name:'Barbell', exs:[
+        { n:'Barbell Row', s:'3x12', c:'Chest supported or inverted. Pull bar to lower ribs, squeeze shoulder blades at the top. Full stretch at the bottom.' },
+      ]},
+      { name:'Dumbbells', exs:[
+        { n:'DB Pullover', s:'3x12', c:'Lats and chest — full overhead stretch. Feel the lats open at the bottom before pulling back.' },
+        { n:'DB Arnold Press', s:'3x12', c:'Rotate through the full range — start palms facing you, finish palms forward. Shoulder definition lives here.' },
+        { n:'DB Zottman Curl', s:'3x12', c:'Curl up supinated, lower pronated. Hits both heads of the bicep and the forearm. Slow on the way down.' },
+      ]},
+      { name:'Cables — stay here until done', exs:[
+        { n:'Cable Chest Press', s:'4x12', c:'Full range — feel the pec stretch at the bottom. Squeeze hard at the top.' },
+        { n:'Cable Chest Fly', s:'3x15', c:'2-sec stretch at the bottom — arms wide, chest opens fully. Squeeze at the top.' },
+        { n:'Single Arm Cable Pulldown', s:'4x12/side', c:'Elbow drives to hip — full lat engagement. Full stretch at the top before every rep.' },
+        { n:'Cable Lateral Raise', s:'3x15/side', c:'Single arm — constant tension on the delt the whole rep. No momentum.' },
+        { n:'Tricep Cable Pushdown', s:'3x15', c:'Elbows pinned to your sides. Squeeze hard at the bottom. Slow return.' },
+      ]},
+    ],
+  },
+  {
+    id:'dayE', label:'Day E', sub:'Full Body', day:'Fri / Sat',
+    title:'Full Body — Fit In When You Can',
+    subtitle:'Something always beats nothing. 35 minutes and you\'re done.',
+    duration:'~35 min', note:'When life is busy — this one. Show up, do the work, go live your life.',
+    blocks:[
+      { name:'Lower body', exs:[
+        { n:'Banded Hip Thrust', s:'3x20', c:'Band above knees, slow pulse at the top. Light load, high reps — metabolic stress on the glutes.' },
+        { n:'Goblet Squat — Heels Elevated', s:'3x12', c:'Pause at the bottom, drive knees out. Heels on plates — increases glute activation.' },
+        { n:'Cable Kickback', s:'3x15/side', c:'Full extension — upper glute max. Squeeze and hold at the top.' },
+      ]},
+      { name:'Upper body', exs:[
+        { n:'Cable Chest Press', s:'3x12', c:'Full range — different feel from DB work with Christin.' },
+        { n:'Single Arm Cable Pulldown', s:'3x12/side', c:'Elbow to hip, full lat stretch at the top.' },
+      ]},
+      { name:'Core', exs:[
+        { n:'Step Up w/ High Knee Drive', s:'3x12/side', c:'Drive knee high — this builds the glute shelf. Push through the working heel.' },
+        { n:'Dead Bug', s:'3x8/side', c:'Lower back flat the entire time. Slow and controlled. Opposite arm and leg extend together.' },
+      ]},
+    ],
+  },
+  {
+    id:'qUpper', label:'Quick', sub:'Upper', day:'Any day',
+    title:'Quick Upper Body',
+    subtitle:'20 minutes. Pair with 20 min cardio. Done.',
+    duration:'~20 min', note:'Time is tight. This still counts. Show up.',
+    blocks:[{ name:'20 min circuit', exs:[
+      { n:'Cable Chest Press', s:'3x12', c:'Full range, feel the pec.' },
+      { n:'Single Arm Cable Pulldown', s:'3x12/side', c:'Elbow drives to hip.' },
+      { n:'DB Arnold Press', s:'3x10', c:'Rotate through full range.' },
+      { n:'DB Zottman Curl', s:'2x12', c:'Slow on the way down.' },
+      { n:'Tricep Cable Pushdown', s:'2x15', c:'Elbows pinned, squeeze at bottom.' },
+    ]}],
+  },
+  {
+    id:'qLower', label:'Quick', sub:'Lower', day:'Any day',
+    title:'Quick Glute Focus',
+    subtitle:'20 minutes. Pair with 20 min cardio. June 8 is coming.',
+    duration:'~20 min', note:'Even on the short days — the glutes get work.',
+    blocks:[{ name:'20 min circuit', exs:[
+      { n:'Banded Hip Thrust', s:'3x20', c:'Band above knees — squeeze hard at the top.' },
+      { n:'Cable Kickback', s:'3x15/side', c:'Full extension — upper shelf.' },
+      { n:'Deficit Elevated Sumo Squat', s:'3x12', c:'Deep stretch — drive knees out.' },
+      { n:'Feet Elevated Single Leg Bridge', s:'2x15/side', c:'Foot on bench — squeeze at top.' },
+      { n:'Seated Hip Abduction', s:'2x20', c:'Slow tempo — glute med burn.' },
+    ]}],
+  },
+];
+
+let activeWo = 'dayD';
+
+function renderWoSelector() {
+  const sel = document.getElementById('wo-selector');
+  sel.innerHTML = '';
+  WORKOUTS.forEach(w => {
+    const btn = document.createElement('div');
+    btn.className = 'wo-btn' + (w.id === activeWo ? ' active' : '');
+    btn.onclick = () => { activeWo = w.id; renderWoSelector(); renderWoDetail(); };
+    btn.innerHTML = `<div class="wo-btn-label">${w.label}</div><div class="wo-btn-sub">${w.sub}</div>`;
+    sel.appendChild(btn);
+  });
+}
+
+function renderWoDetail() {
+  const wo = WORKOUTS.find(w => w.id === activeWo);
+  const detail = document.getElementById('wo-detail');
+  const checked = state.exChecked || {};
+  const weights = state.exWeights || {};
+
+  let html = `
+    <div style="font-family:Georgia,serif;font-size:22px;color:#2c2416">${wo.title}</div>
+    <div style="font-size:13px;color:#8a7f74;margin-top:4px;line-height:1.5;margin-bottom:8px">${wo.subtitle}</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:#e8e2d9;color:#8a7f74;padding:3px 10px;border-radius:20px">${wo.duration}</span>
+      <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:#e8f0e4;color:#4a5e3e;padding:3px 10px;border-radius:20px">${wo.day}</span>
+    </div>
+    <div class="note-bar">${wo.note}</div>`;
+
+  wo.blocks.forEach((block, bi) => {
+    html += `<div class="block-label" style="margin-bottom:10px">${block.name}<div class="block-label-line"></div></div>`;
+    block.exs.forEach((ex, ei) => {
+      const key = `${activeWo}-${bi}-${ei}`;
+      const done = !!checked[key];
+      const wt = weights[key] || '';
+      html += `
+        <div class="ex-item ${done?'done':''}" id="exitem-${key}">
+          <div class="ex-bar"></div>
+          <div class="ex-header" onclick="toggleCue('${key}')">
+            <div class="ex-info">
+              <div class="ex-name">${ex.n}</div>
+              <div class="ex-sets">${ex.s}</div>
+            </div>
+            <input type="number" class="ex-wt" placeholder="lbs" value="${wt}"
+              onclick="event.stopPropagation()"
+              onchange="saveWeight('${key}', this.value)"
+              oninput="saveWeight('${key}', this.value)">
+            <div class="ex-check ${done?'done':''}" onclick="event.stopPropagation();toggleEx('${key}')">✓</div>
+          </div>
+          <div class="ex-cue" id="cue-${key}">${ex.c}</div>
+        </div>`;
+    });
+  });
+
+  detail.innerHTML = html;
+}
+
+function toggleCue(key) {
+  const cue = document.getElementById('cue-' + key);
+  if (cue) cue.classList.toggle('open');
+}
+
+function toggleEx(key) {
+  state.exChecked = state.exChecked || {};
+  state.exChecked[key] = !state.exChecked[key];
+  save(state);
+  const item = document.getElementById('exitem-' + key);
+  const check = item.querySelector('.ex-check');
+  if (state.exChecked[key]) {
+    item.classList.add('done');
+    check.classList.add('done');
+  } else {
+    item.classList.remove('done');
+    check.classList.remove('done');
+  }
+}
+
+function saveWeight(key, val) {
+  state.exWeights = state.exWeights || {};
+  state.exWeights[key] = val;
+  save(state);
+}
+
+renderWoSelector();
+renderWoDetail();
+
+// ── WALK ──────────────────────────────────────────
+function renderWalk() {
+  const walks = state.walks || {};
+  const total = Object.keys(walks).length;
+  let streak = 0;
+  const d = new Date();
+  while (walks[d.toDateString()]) { streak++; d.setDate(d.getDate()-1); }
+
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('streak-label').textContent = streak === 0 ? 'Start your streak' : streak === 1 ? '1 day streak' : `${streak} day streak`;
+  document.getElementById('walk-total').textContent = `${total} total walks logged`;
+
+  const walkedToday = !!walks[todayKey];
+  const btn = document.getElementById('walk-btn');
+  btn.textContent = walkedToday ? '✓ Walked Today — Nice.' : "Log Today's Walk";
+  btn.style.background = walkedToday ? '#7a8c6e' : '#2c2416';
+
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = date.toDateString();
+    const walked = !!walks[key];
+    const isToday = i === 0;
+    const div = document.createElement('div');
+    div.className = 'week-day' + (walked ? ' walked' : '') + (isToday ? ' today' : '');
+    div.onclick = () => {
+      state.walks = state.walks || {};
+      if (state.walks[key]) delete state.walks[key]; else state.walks[key] = true;
+      save(state);
+      renderWalk();
+    };
+    div.innerHTML = `<div class="week-day-lbl">${days[date.getDay()]}</div>${walked ? '<div class="week-day-check">✓</div>' : ''}`;
+    grid.appendChild(div);
+  }
+}
+
+function toggleTodayWalk() {
+  state.walks = state.walks || {};
+  if (state.walks[todayKey]) delete state.walks[todayKey]; else state.walks[todayKey] = true;
+  save(state);
+  renderWalk();
+}
+renderWalk();
+
+// ── PROGRESS / LIFT TRACKER ───────────────────────
+const LIFTS = [
+  { id:'hipThrust', name:'Hip Thrust', badge:'Glutes', note:'185 → 205 lbs in April. Keep climbing.' },
+  { id:'squat', name:'Back Squat', badge:'Legs', note:'New May addition. Build it.' },
+  { id:'rdl', name:'Romanian Deadlift', badge:'Hamstrings', note:'3-sec lower, feel the stretch.' },
+  { id:'latPull', name:'Lat Pulldown', badge:'Back', note:'Full stretch at top every rep.' },
+];
+
+function renderLifts() {
+  const tracker = document.getElementById('lift-tracker');
+  tracker.innerHTML = '';
+  const history = state.liftHistory || {};
+  LIFTS.forEach(lift => {
+    const h = (history[lift.id] || []).slice(-5).reverse();
+    const div = document.createElement('div');
+    div.className = 'lift-card';
+    let recentHtml = '';
+    if (h.length > 0) {
+      recentHtml = `<div class="lift-recent"><div class="lift-recent-title">Recent</div>` +
+        h.map(e => `<div class="lift-recent-row"><span>${e.sets}×${e.reps} @ ${e.weight} lbs</span><span style="color:#b8a99a;font-size:11px">${e.date}</span></div>`).join('') +
+        `</div>`;
+    }
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="lift-name">${lift.name}</div>
+        <span class="lift-badge">${lift.badge}</span>
+      </div>
+      <div class="lift-note">${lift.note}</div>
+      <div class="input-grid">
+        <div><label class="input-label">Weight (lbs)</label><input type="number" id="lw-${lift.id}" placeholder="135" class="input-field"></div>
+        <div><label class="input-label">Sets</label><input type="number" id="ls-${lift.id}" placeholder="3" class="input-field"></div>
+        <div><label class="input-label">Reps</label><input type="number" id="lr-${lift.id}" placeholder="8" class="input-field"></div>
+      </div>
+      <button class="action-btn" onclick="logLift('${lift.id}')">Log Session</button>
+      ${recentHtml}`;
+    tracker.appendChild(div);
+  });
+}
+
+function logLift(id) {
+  const w = document.getElementById('lw-'+id).value;
+  const s = document.getElementById('ls-'+id).value;
+  const r = document.getElementById('lr-'+id).value;
+  if (!w || !s || !r) return;
+  const entry = { weight: parseFloat(w), sets: parseInt(s), reps: parseInt(r), date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}), timestamp: Date.now() };
+  state.liftHistory = state.liftHistory || {};
+  state.liftHistory[id] = [...(state.liftHistory[id]||[]), entry].slice(-20);
+  save(state);
+  renderLifts();
+}
+renderLifts();
+
+// ── TABS ──────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
