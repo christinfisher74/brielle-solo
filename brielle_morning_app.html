@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Brielle · FSE">
+  <meta name="theme-color" content="#f5f0e8">
+  <title>Brielle · Feminine Strength</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { background:#f5f0e8; overscroll-behavior:none; }
+    #root { min-height:100vh; }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+    input[type=number] { -moz-appearance:textfield; }
+    ::-webkit-scrollbar { display:none; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const C = {
+  cream:"#f5f0e8", warm:"#faf8f4", sage:"#7a8c6e", darkSage:"#4a5e3e",
+  taupe:"#b8a99a", deep:"#2c2416", amber:"#c4813a", soft:"#e8e2d9", muted:"#8a7f74",
+};
+
+const s = {
+  tag:{ display:"inline-block", background:C.soft, color:C.muted, fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", padding:"4px 10px", borderRadius:20, marginBottom:14 },
+  card:{ background:C.warm, border:`1px solid ${C.soft}`, borderRadius:16, padding:20, marginBottom:12 },
+  infoCard:{ background:C.cream, borderRadius:10, padding:14, marginBottom:8 },
+  infoTitle:{ fontSize:12, fontWeight:500, color:C.deep, marginBottom:6 },
+  infoBody:{ fontSize:12, color:C.muted, lineHeight:1.65 },
+  actionBtn:{ width:"100%", background:C.deep, color:C.cream, border:"none", borderRadius:10, padding:12, fontFamily:"inherit", fontSize:13, fontWeight:500, letterSpacing:"0.04em", cursor:"pointer", marginTop:4 },
+  secBtn:{ width:"100%", background:"none", color:C.muted, border:`1px solid ${C.soft}`, borderRadius:10, padding:12, fontFamily:"inherit", fontSize:13, cursor:"pointer", marginTop:6 },
+  blockLabel:{ fontSize:10, letterSpacing:"0.18em", textTransform:"uppercase", color:C.taupe, marginBottom:10, display:"flex", alignItems:"center", gap:8 },
+  input:{ width:"100%", background:C.cream, border:`1px solid ${C.soft}`, borderRadius:8, padding:"9px 10px", fontFamily:"inherit", fontSize:14, color:C.deep },
+  label:{ display:"block", fontSize:10, letterSpacing:"0.1em", textTransform:"uppercase", color:C.taupe, marginBottom:5 },
+};
+
+function Tag({ children, style }) { return <span style={{...s.tag,...style}}>{children}</span>; }
+function InfoCard({ title, children }) { return <div style={s.infoCard}><div style={s.infoTitle}>{title}</div><div style={s.infoBody}>{children}</div></div>; }
+function ProgressBar({ value, color=C.sage }) {
+  return <div style={{height:4,background:C.soft,borderRadius:2,overflow:"hidden"}}>
+    <div style={{height:"100%",width:`${Math.min(100,Math.max(0,value))}%`,background:color,borderRadius:2,transition:"width 0.4s ease"}}/>
+  </div>;
+}
+function Circle({ done, size=26 }) {
+  return <div style={{width:size,height:size,borderRadius:"50%",border:`1.5px solid ${done?C.sage:C.soft}`,background:done?C.sage:C.cream,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:done?"white":"transparent",flexShrink:0,transition:"all 0.2s"}}>✓</div>;
+}
+
+const SK = "brielle_fse_v1";
+function loadState() { try { return JSON.parse(localStorage.getItem(SK)) || {}; } catch { return {}; } }
+function saveState(s) { try { localStorage.setItem(SK, JSON.stringify(s)); } catch {} }
+
+// ── MORNING CHECKLIST ─────────────────────────────
+const MORNING_ITEMS = [
+  { id:"water", icon:"💧", name:"16–20 oz Water", note:"Before coffee, before food. Rehydrate from overnight." },
+  { id:"protein_b", icon:"🥩", name:"Protein at breakfast", note:"Hit 30–35g before anything else. Sets the tone for 120g." },
+  { id:"walk", icon:"🚶‍♀️", name:"Walk today?", note:"Target 3x per week — consistent is everything." },
+  { id:"weigh", icon:"⚖️", name:"Weigh in", note:"First thing. Before eating or drinking. Data is power." },
+  { id:"log", icon:"📋", name:"Log food", note:"Track it. You can't manage what you don't measure." },
+];
+
+function MorningTab({ state, setState }) {
+  const ritual = state.ritual || {};
+  const toggle = (id) => setState(s => ({...s, ritual:{...(s.ritual||{}), [id]:!(s.ritual||{})[id]}}));
+  const doneCount = MORNING_ITEMS.filter(i => ritual[i.id]).length;
+  const todayStr = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+
+  const birthday = new Date("2026-06-08");
+  const today = new Date();
+  const daysLeft = Math.max(0, Math.ceil((birthday - today) / (1000*60*60*24)));
+
+  return (
+    <div style={{paddingBottom:20}}>
+      <div style={{padding:"28px 20px 0"}}>
+        <Tag>First thing · every day</Tag>
+        <p style={{fontSize:14,lineHeight:1.7,color:C.muted}}>Before the business, before the clients, before everything else. This is yours. Start from a full place.</p>
+      </div>
+
+      {daysLeft > 0 && (
+        <div style={{margin:"16px 20px 0",background:C.deep,borderRadius:14,padding:"16px 18px",color:C.cream,display:"flex",alignItems:"center",gap:16}}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:38,color:C.amber,lineHeight:1}}>{daysLeft}</div>
+          <div>
+            <div style={{fontSize:14,fontWeight:500}}>days until June 8</div>
+            <div style={{fontSize:12,color:C.taupe,marginTop:2}}>Your birthday. Keep going — it's working.</div>
+          </div>
+        </div>
+      )}
+
+      <div style={{padding:"16px 20px 4px"}}>
+        <ProgressBar value={(doneCount/MORNING_ITEMS.length)*100}/>
+        <div style={{fontSize:11,color:C.muted,marginTop:6}}>{doneCount} of {MORNING_ITEMS.length} done</div>
+      </div>
+
+      <div style={{padding:"8px 20px 0",display:"flex",flexDirection:"column",gap:10}}>
+        {MORNING_ITEMS.map(item => {
+          const done = ritual[item.id];
+          return (
+            <div key={item.id} onClick={()=>toggle(item.id)} style={{display:"flex",alignItems:"center",gap:16,background:C.warm,border:`1px solid ${C.soft}`,borderRadius:14,padding:"16px 18px",cursor:"pointer",opacity:done?0.65:1,position:"relative",overflow:"hidden",transition:"opacity 0.2s"}}>
+              <div style={{position:"absolute",left:0,top:0,bottom:0,width:4,background:done?C.sage:C.soft,transition:"background 0.2s"}}/>
+              <div style={{fontSize:22,width:32,textAlign:"center",flexShrink:0}}>{item.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:15,fontWeight:500,color:C.deep}}>{item.name}</div>
+                <div style={{fontSize:12,color:C.muted,marginTop:2,lineHeight:1.4}}>{item.note}</div>
+              </div>
+              <Circle done={done}/>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{padding:"20px 20px 0"}}>
+        <div style={{...s.blockLabel,marginBottom:12}}>Pre-training fuel<div style={{flex:1,height:1,background:C.soft}}/></div>
+        <InfoCard title="🍌 Training day (Mon + Tue)">Dates or a banana 30–45 min before. Quick carbs = better output on heavy sets. Your hip thrust needs fuel.</InfoCard>
+        <InfoCard title="☕ Non-training day">Coffee is fine first. Walk fasted if you can — you're tapping fat stores directly.</InfoCard>
+        <InfoCard title="🌙 The night before">Protein at dinner, in bed at a reasonable hour. Recovery happens while you sleep — not in the gym.</InfoCard>
+      </div>
+    </div>
+  );
+}
+
+// ── NUTRITION TAB ─────────────────────────────────
+const DAILY_HABITS = [
+  { id:"h_protein", icon:"🥩", name:"Hit 120g+ protein", detail:"Spread it across meals — don't leave it to dinner" },
+  { id:"h_water", icon:"💧", name:"Drink 80+ oz water", detail:"Hunger is often thirst. Stay ahead of it." },
+  { id:"h_carbs", icon:"🍌", name:"Carb boost today", detail:"Honey on oatmeal, banana, dates — close the gap without extra volume" },
+  { id:"h_veg", icon:"🥦", name:"Veggies at 2+ meals", detail:"Volume, fiber, satiety — the trifecta" },
+  { id:"h_sleep", icon:"🌙", name:"In bed by 10pm", detail:"Poor sleep tanks fat loss and spikes hunger hormones" },
+  { id:"h_mindless", icon:"🧠", name:"No mindless eating", detail:"Ate intentionally — sat down, plated, present" },
+];
+
+function NutritionTab({ state, setState }) {
+  const todayLog = state.todayNutrition || {};
+  const todayHabits = state.dailyHabits || {};
+  const [logCal, setLogCal] = useState(todayLog.calories||"");
+  const [logProt, setLogProt] = useState(todayLog.protein||"");
+  const [logCarbs, setLogCarbs] = useState(todayLog.carbs||"");
+
+  const targetCal = 1400;
+  const targetProt = 130;
+  const targetCarbs = 170;
+  const targetFat = 60;
+
+  const loggedCal = parseInt(todayLog.calories||0);
+  const loggedProt = parseInt(todayLog.protein||0);
+  const loggedCarbs = parseInt(todayLog.carbs||0);
+
+  const saveLog = () => setState(s=>({...s, todayNutrition:{calories:logCal,protein:logProt,carbs:logCarbs}}));
+  const toggleHabit = (id) => setState(s=>({...s, dailyHabits:{...(s.dailyHabits||{}),[id]:!(s.dailyHabits||{})[id]}}));
+
+  return (
+    <div style={{paddingBottom:20}}>
+      <div style={{padding:"28px 20px 0"}}>
+        <Tag>Fat loss · muscle preservation</Tag>
+        <p style={{fontSize:14,lineHeight:1.7,color:C.muted}}>Clean food, consistent portions. You're averaging 1+ lb/week — that's the sweet spot. We're changing your shape, not just your weight.</p>
+      </div>
+      <div style={{padding:"20px 20px 0"}}>
+
+        <div style={s.card}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <span style={{fontFamily:"Georgia,serif",fontSize:18,color:C.deep}}>Daily targets</span>
+            <span style={{fontSize:11,letterSpacing:"0.08em",background:"#fde8d0",color:"#9b5e1a",padding:"3px 10px",borderRadius:20}}>~1,400 kcal</span>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}>
+            {[["Protein","130g",C.sage],["Carbs","170g",C.amber],["Fat","60g",C.taupe],["Fiber","25g+",C.darkSage]].map(([l,v,col])=>(
+              <div key={l} style={{background:C.cream,borderRadius:10,padding:"11px 12px",textAlign:"center"}}>
+                <div style={{fontFamily:"Georgia,serif",fontSize:20,color:col,fontWeight:500}}>{v}</div>
+                <div style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",color:C.taupe,marginTop:2}}>{l}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{marginBottom:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.muted,marginBottom:4}}>
+              <span style={{fontWeight:500,color:C.deep}}>Calories today</span><span>{loggedCal} / {targetCal}</span>
+            </div>
+            <ProgressBar value={(loggedCal/targetCal)*100} color={C.deep}/>
+          </div>
+          <div style={{marginBottom:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.muted,marginBottom:4}}>
+              <span style={{fontWeight:500,color:C.deep}}>Protein today</span><span>{loggedProt}g / {targetProt}g</span>
+            </div>
+            <ProgressBar value={(loggedProt/targetProt)*100} color={C.sage}/>
+          </div>
+          <div style={{marginBottom:14}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.muted,marginBottom:4}}>
+              <span style={{fontWeight:500,color:C.deep}}>Carbs today</span><span>{loggedCarbs}g / {targetCarbs}g</span>
+            </div>
+            <ProgressBar value={(loggedCarbs/targetCarbs)*100} color={C.amber}/>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8}}>
+            {[["Calories","calories","0"],["Protein (g)","protein","0"],["Carbs (g)","carbs","0"]].map(([l,k,ph])=>(
+              <div key={k}>
+                <label style={s.label}>{l}</label>
+                <input type="number" placeholder={ph}
+                  value={k==="calories"?logCal:k==="protein"?logProt:logCarbs}
+                  onChange={e=>k==="calories"?setLogCal(e.target.value):k==="protein"?setLogProt(e.target.value):setLogCarbs(e.target.value)}
+                  style={s.input}/>
+              </div>
+            ))}
+          </div>
+          <button onClick={saveLog} style={s.actionBtn}>Save Today's Numbers</button>
+        </div>
+
+        <div style={{...s.blockLabel,marginBottom:12}}>Carb boosts — no extra volume<div style={{flex:1,height:1,background:C.soft}}/></div>
+        {[
+          ["🍯 Honey on oatmeal","1 tbsp = ~17g carbs. Drizzle it in — no extra fullness."],
+          ["🍌 Banana","~27g carbs. Easy grab before training or as a snack."],
+          ["🌴 2–3 dates","~35–40g carbs. Tiny volume, big carb hit. Great pre-workout."],
+          ["🍚 Extra white rice","Already in your meals — slightly bigger portion adds 15–20g."],
+          ["🍬 Rice cakes","~7–10g each. Easy snack, barely filling."],
+        ].map(([t,b],i)=><InfoCard key={i} title={t}>{b}</InfoCard>)}
+
+        <div style={{...s.blockLabel,marginTop:16,marginBottom:12}}>Daily habits<div style={{flex:1,height:1,background:C.soft}}/></div>
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:8}}>
+          {DAILY_HABITS.map(h=>{
+            const done = todayHabits[h.id];
+            return (
+              <div key={h.id} onClick={()=>toggleHabit(h.id)} style={{display:"flex",alignItems:"center",gap:12,background:C.cream,borderRadius:10,padding:"11px 13px",cursor:"pointer",opacity:done?0.55:1,transition:"opacity 0.2s"}}>
+                <div style={{fontSize:18,width:24,textAlign:"center",flexShrink:0}}>{h.icon}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,color:C.deep}}>{h.name}</div>
+                  <div style={{fontSize:11,color:C.muted}}>{h.detail}</div>
+                </div>
+                <Circle done={done} size={22}/>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{...s.blockLabel,marginTop:16,marginBottom:12}}>Why this rate of loss matters<div style={{flex:1,height:1,background:C.soft}}/></div>
+        <InfoCard title="📊 ~1+ lb/week — ideal range">Healthy sustainable fat loss is 0.5–1 lb/week. You're right there. Faster than this means losing muscle — including in your glutes. Slower is fine too.</InfoCard>
+        <InfoCard title="💪 Muscle is going UP while weight goes DOWN">That's body recomposition. It's rare. It means the training and the food are working together exactly right. We're not just making you smaller — we're changing your shape.</InfoCard>
+        <InfoCard title="🍑 Losing muscle = losing booty">This is why we don't slash calories aggressively. Your glute development depends on preserving and building muscle tissue while the fat comes off. The programming and the nutrition work together.</InfoCard>
+        <InfoCard title="📋 May 12 body scan">Weight: 195.6 lbs · Body Fat: 45.5% · Skeletal Muscle: 30.1% (↑) · Visceral Fat: 17 (↓) · BMR: 1,413 kcal</InfoCard>
+      </div>
+    </div>
+  );
+}
+
+// ── TRAINING TAB ──────────────────────────────────
+const HIP_THRUST_WEEKS = [
+  { week:"Week 1", variation:"Deficit Hip Thrust", target:"205–215 lbs", sets:"4x10", note:"Plates under shoulders — deeper range, feel the stretch at bottom" },
+  { week:"Week 2", variation:"Barbell + Band Overload", target:"185 lbs + band", sets:"4x12", note:"Band above knees — mechanical tension meets metabolic stress" },
+  { week:"Week 3", variation:"Heavy Pause", target:"215–225+ lbs", sets:"4x6-8", note:"3-sec pause at top — push past your best" },
+  { week:"Week 4", variation:"Single Leg Barbell", target:"95–115 lbs/side", sets:"3x10/side", note:"Full lockout — drive through heel every rep" },
+];
+
+const MONDAY_EXERCISES = [
+  { name:"DB Incline Press", sets:"4x12", cue:"3-sec lower — feel the chest stretch at bottom. Explosive press up." },
+  { name:"Cable Lat Pulldown — Wide Bar", sets:"4x12", cue:"Full stretch at top, drive elbows down to hips. Feel the lats working." },
+  { name:"DB Alternating Shoulder Press", sets:"3x12/side", cue:"One side at a time. Slow — no rushing. Full range of motion." },
+  { name:"DB Reverse Fly", sets:"3x15", cue:"Hinge forward, lead with elbows. Rear delt focus — this builds shoulder definition." },
+  { name:"DB Lateral Raise — 21s", sets:"3 rounds", cue:"7 reps bottom to mid · 7 reps mid to top · 7 full reps. No rest between. This will burn." },
+  { name:"Cable Tricep Overhead Extension", sets:"3x15", cue:"Full stretch at bottom — squeeze hard at top. The long head needs this range." },
+  { name:"DB Hammer Curl", sets:"3x15", cue:"3-sec eccentric lower. No swinging. These are a gift to yourself." },
+];
+
+const CORE_EXERCISES = [
+  { name:"Dead Bug Chest Press", sets:"3x8/side", cue:"Press DB up as opposite arm and leg lower. Brace your core hard — lower back stays flat the entire time." },
+  { name:"Pallof Press", sets:"3x10/side", cue:"Cable or band. Resist the rotation — your core is fighting the pull. Brace before every rep." },
+  { name:"Ab Wheel Rollout", sets:"3x8", cue:"Control the return. If your lower back arches — shorten the range. Quality over distance." },
+];
+
+const TUESDAY_MAIN = [
+  { name:"Back Squat", sets:"4x8", cue:"Drive through heels, chest tall. Sit into your hips. This is your strength base." },
+  { name:"BB Hip Thrust — See progression above", sets:"4 sets", cue:"This is the anchor lift. Full focus. Time under tension this month — feel every rep." },
+  { name:"BB Glute-Focused Back Extension", sets:"4x12", cue:"Slight forward lean at the top, posterior tilt. Squeeze glutes hard at extension." },
+  { name:"Hamstring Roller — Bridge Curl", sets:"3x12", cue:"Hips up, feet on roller. Curl in and out — hamstrings only. Keep hips high." },
+  { name:"DB Romanian Deadlift", sets:"3x12", cue:"3-sec lower — feel the stretch. Drive hips through at the top. This is a hinge, not a squat." },
+];
+
+const TUESDAY_ACC = [
+  { name:"Banded Standing Kickback", sets:"3x20/side", cue:"Full extension — squeeze upper glute hard at the top. Slow return. This builds the shelf." },
+  { name:"Banded Hip Abduction — 3 Position Burnout", sets:"2 rounds", cue:"Leaning back / upright / leaning forward. No rest between positions. Constant tension on glute med." },
+  { name:"Banded Frog Pump or Single Leg Bridge", sets:"3x25", cue:"Finisher. Every single rep gets a squeeze. Don't phone it in — this is the last impression on the glutes." },
+];
+
+function ExBlock({ exercises, checked, onToggle, activePrefix }) {
+  const [expanded, setExpanded] = useState(null);
+  let idx = 0;
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      {exercises.map((ex,i) => {
+        const key = `${activePrefix}-${i}`;
+        const done = checked[key];
+        const open = expanded===key;
+        return (
+          <div key={key} style={{background:C.warm,border:`1px solid ${C.soft}`,borderRadius:14,overflow:"hidden",position:"relative",opacity:done?0.55:1,transition:"opacity 0.2s"}}>
+            <div style={{position:"absolute",left:0,top:0,bottom:0,width:3,background:done?C.sage:C.soft}}/>
+            <div onClick={()=>setExpanded(open?null:key)} style={{display:"flex",alignItems:"flex-start",padding:"13px 14px",gap:10,cursor:"pointer"}}>
+              <div style={{fontSize:11,fontWeight:600,color:C.taupe,width:20,flexShrink:0,paddingTop:3}}>{String(i+1).padStart(2,"0")}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:500,color:C.deep,lineHeight:1.3}}>{ex.name}</div>
+                <div style={{fontSize:12,color:C.amber,fontWeight:500,marginTop:2}}>{ex.sets}</div>
+              </div>
+              <div onClick={e=>{e.stopPropagation();onToggle(key);}} style={{width:28,height:28,borderRadius:"50%",border:`1.5px solid ${done?C.sage:C.soft}`,background:done?C.sage:C.cream,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:done?"white":"transparent",cursor:"pointer",flexShrink:0,transition:"all 0.2s"}}>✓</div>
+            </div>
+            {open && <div style={{padding:"10px 14px 13px 44px",borderTop:`1px solid ${C.soft}`,fontSize:12,lineHeight:1.6,color:C.muted}}>{ex.cue}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function TrainingTab({ state, setState }) {
+  const [activeDay, setActiveDay] = useState("mon");
+  const checked = state.trainingChecked || {};
+
+  const toggleEx = (key) => setState(s => {
+    const tc = {...(s.trainingChecked||{})};
+    tc[key] = !tc[key];
+    return {...s, trainingChecked:tc};
+  });
+
+  const monAll = MONDAY_EXERCISES.length + CORE_EXERCISES.length;
+  const tueAll = TUESDAY_MAIN.length + TUESDAY_ACC.length;
+  const monDone = Object.keys(checked).filter(k=>k.startsWith("mon-")&&checked[k]).length;
+  const tueDone = Object.keys(checked).filter(k=>k.startsWith("tue-")&&checked[k]).length;
+
+  return (
+    <div style={{paddingBottom:20}}>
+      <div style={{padding:"20px 20px 0",display:"flex",gap:8}}>
+        {[{id:"mon",label:"Monday",sub:"Upper + Core"},{id:"tue",label:"Tuesday",sub:"Glutes + Lower"}].map(d=>(
+          <div key={d.id} onClick={()=>setActiveDay(d.id)} style={{flex:1,background:d.id===activeDay?C.deep:C.warm,border:`1.5px solid ${d.id===activeDay?C.deep:C.soft}`,borderRadius:12,padding:"12px 8px",textAlign:"center",cursor:"pointer",transition:"all 0.2s"}}>
+            <div style={{fontSize:13,fontWeight:500,color:d.id===activeDay?C.cream:C.deep}}>{d.label}</div>
+            <div style={{fontSize:11,color:d.id===activeDay?C.taupe:C.muted,marginTop:2}}>{d.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {activeDay==="mon" && (
+        <div style={{padding:"18px 20px 0"}}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:22,color:C.deep}}>Upper Body + Core</div>
+          <div style={{fontSize:13,color:C.muted,marginTop:4,lineHeight:1.5}}>Time under tension. Hypertrophy focus. Feel every rep — this is where definition is built.</div>
+          <div style={{marginTop:12}}>
+            <ProgressBar value={(monDone/monAll)*100}/>
+            <div style={{fontSize:11,color:C.muted,marginTop:6}}>{monDone} of {monAll} exercises done</div>
+          </div>
+
+          <div style={{...s.blockLabel,marginTop:18,marginBottom:10}}>Main work<div style={{flex:1,height:1,background:C.soft}}/></div>
+          <ExBlock exercises={MONDAY_EXERCISES} checked={checked} onToggle={toggleEx} activePrefix="mon"/>
+
+          <div style={{...s.blockLabel,marginTop:18,marginBottom:10}}>Core finisher — 3 rounds<div style={{flex:1,height:1,background:C.soft}}/></div>
+          <ExBlock exercises={CORE_EXERCISES} checked={checked} onToggle={toggleEx} activePrefix="mon-core"/>
+        </div>
+      )}
+
+      {activeDay==="tue" && (
+        <div style={{padding:"18px 20px 0"}}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:22,color:C.deep}}>Glutes + Posterior Chain</div>
+          <div style={{fontSize:13,color:C.muted,marginTop:4,lineHeight:1.5}}>Hip thrust is the anchor. Everything else builds around it. June 8 is the goal — go to work.</div>
+          <div style={{marginTop:12}}>
+            <ProgressBar value={(tueDone/tueAll)*100}/>
+            <div style={{fontSize:11,color:C.muted,marginTop:6}}>{tueDone} of {tueAll} exercises done</div>
+          </div>
+
+          <div style={{...s.blockLabel,marginTop:18,marginBottom:10}}>Hip thrust progression — May 2026<div style={{flex:1,height:1,background:C.soft}}/></div>
+          <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:6}}>
+            {HIP_THRUST_WEEKS.map((w,i)=>(
+              <div key={i} style={{background:C.cream,borderRadius:10,padding:14}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                  <span style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",background:C.soft,color:C.muted,padding:"2px 8px",borderRadius:12}}>{w.week}</span>
+                  <span style={{fontSize:12,color:C.amber,fontWeight:500}}>{w.sets}</span>
+                </div>
+                <div style={{fontSize:14,fontWeight:500,color:C.deep,marginBottom:2}}>{w.variation}</div>
+                <div style={{fontSize:12,color:C.amber,fontWeight:500,marginBottom:3}}>{w.target}</div>
+                <div style={{fontSize:12,color:C.muted,lineHeight:1.5}}>{w.note}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{...s.blockLabel,marginTop:18,marginBottom:10}}>Main lifts<div style={{flex:1,height:1,background:C.soft}}/></div>
+          <ExBlock exercises={TUESDAY_MAIN} checked={checked} onToggle={toggleEx} activePrefix="tue"/>
+
+          <div style={{...s.blockLabel,marginTop:18,marginBottom:10}}>Accessory + finisher<div style={{flex:1,height:1,background:C.soft}}/></div>
+          <ExBlock exercises={TUESDAY_ACC} checked={checked} onToggle={toggleEx} activePrefix="tue-acc"/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── PROGRESS TAB ──────────────────────────────────
+const LIFT_TRACKER = [
+  { id:"hipThrust", name:"Hip Thrust", badge:"Glutes", note:"185 → 205 lbs in April. Keep climbing." },
+  { id:"squat", name:"Back Squat", badge:"Legs", note:"New May addition. Build it." },
+  { id:"rdl", name:"Romanian Deadlift", badge:"Hamstrings", note:"3-sec lower, feel the stretch." },
+  { id:"latPull", name:"Lat Pulldown", badge:"Back", note:"Full stretch at top every rep." },
+];
+
+function ProgressTab({ state, setState }) {
+  const [inputs, setInputs] = useState({});
+  const history = state.liftHistory || {};
+
+  const logLift = (id) => {
+    const inp = inputs[id] || {};
+    if (!inp.weight || !inp.sets || !inp.reps) return;
+    const entry = { weight:parseFloat(inp.weight), sets:parseInt(inp.sets), reps:parseInt(inp.reps), date:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"}), timestamp:Date.now() };
+    setState(s => {
+      const lh = {...(s.liftHistory||{})};
+      lh[id] = [...(lh[id]||[]),entry].slice(-20);
+      return {...s,liftHistory:lh};
+    });
+    setInputs(i=>({...i,[id]:{}}));
+  };
+
+  const birthday = new Date("2026-06-08");
+  const today = new Date();
+  const daysLeft = Math.max(0, Math.ceil((birthday-today)/(1000*60*60*24)));
+
+  return (
+    <div style={{paddingBottom:20}}>
+      <div style={{padding:"28px 20px 0"}}>
+        <Tag>March 23 → today</Tag>
+        <p style={{fontSize:14,lineHeight:1.7,color:C.muted}}>Every number moving in the right direction. Smooth, steady, real — not a crash, not a gimmick. This is what consistency looks like.</p>
+      </div>
+
+      <div style={{padding:"16px 20px 0"}}>
+        <div style={s.card}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:17,color:C.deep,marginBottom:14}}>Body composition journey</div>
+          {[
+            ["Weight","204.0 lbs","195.6 lbs","▼ 8.4 lbs",C.sage],
+            ["Body fat","47.5%","45.5%","▼ 2.0 pts",C.sage],
+            ["Sub. fat","86.6 lbs","79.6 lbs","▼ 7 lbs fat",C.sage],
+            ["Skeletal muscle","29.0%","30.1%","▲ 1.1 pts",C.sage],
+            ["Visceral fat","18","17","▼ 1 point",C.sage],
+            ["Hip thrust","165 lbs","205 lbs","▲ 40 lbs",C.amber],
+          ].map(([label,start,now,change,col],i)=>(
+            <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.soft}`}}>
+              <div style={{fontSize:13,color:C.muted,width:100}}>{label}</div>
+              <div style={{fontSize:12,color:C.muted}}>{start}</div>
+              <div style={{fontSize:13,fontWeight:500,color:C.deep}}>{now}</div>
+              <div style={{fontSize:12,fontWeight:500,color:col}}>{change}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{background:C.deep,borderRadius:14,padding:"18px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:16}}>
+          <div style={{fontFamily:"Georgia,serif",fontSize:44,color:C.amber,lineHeight:1}}>{daysLeft}</div>
+          <div>
+            <div style={{fontSize:15,fontWeight:500,color:C.cream}}>days until June 8</div>
+            <div style={{fontSize:12,color:C.taupe,marginTop:3,lineHeight:1.5}}>At current rate — another 3–4 lbs possible. Keep showing up.</div>
+          </div>
+        </div>
+
+        <div style={{...s.blockLabel,marginBottom:12}}>Lift tracker<div style={{flex:1,height:1,background:C.soft}}/></div>
+        {LIFT_TRACKER.map(lift=>{
+          const h = (history[lift.id]||[]).slice(-5).reverse();
+          const inp = inputs[lift.id] || {};
+          return (
+            <div key={lift.id} style={{...s.card}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                <div style={{fontFamily:"Georgia,serif",fontSize:18,color:C.deep}}>{lift.name}</div>
+                <span style={{fontSize:10,letterSpacing:"0.12em",textTransform:"uppercase",background:C.soft,color:C.muted,padding:"3px 9px",borderRadius:12}}>{lift.badge}</span>
+              </div>
+              <div style={{fontSize:12,color:C.muted,marginBottom:12,lineHeight:1.4}}>{lift.note}</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
+                {["weight","sets","reps"].map(field=>(
+                  <div key={field}>
+                    <label style={s.label}>{field==="weight"?"Weight (lbs)":field.charAt(0).toUpperCase()+field.slice(1)}</label>
+                    <input type="number" placeholder={field==="weight"?"135":field==="sets"?"3":"8"} value={inp[field]||""} onChange={e=>setInputs(i=>({...i,[lift.id]:{...inp,[field]:e.target.value}}))} style={s.input}/>
+                  </div>
+                ))}
+              </div>
+              <button onClick={()=>logLift(lift.id)} style={s.actionBtn}>Log Session</button>
+              {h.length>0&&(
+                <div style={{marginTop:12,borderTop:`1px solid ${C.soft}`,paddingTop:10}}>
+                  <div style={{fontSize:10,letterSpacing:"0.12em",textTransform:"uppercase",color:C.taupe,marginBottom:6}}>Recent</div>
+                  {h.map((e,i)=>(
+                    <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:C.muted,padding:"3px 0"}}>
+                      <span style={{fontWeight:500,color:C.deep}}>{e.sets}×{e.reps} @ {e.weight} lbs</span>
+                      <span style={{fontSize:11,color:C.taupe}}>{e.date}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── WALK TAB ──────────────────────────────────────
+function WalkTab({ state, setState }) {
+  const walks = state.walks || {};
+  const todayKey = new Date().toDateString();
+  const walkedToday = walks[todayKey];
+
+  const weekDays = (() => {
+    const now=new Date(); const days=["Su","Mo","Tu","We","Th","Fr","Sa"]; const result=[];
+    for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);result.push({label:days[d.getDay()],key:d.toDateString(),today:i===0});}
+    return result;
+  })();
+
+  const streak = (() => {
+    let s=0; const d=new Date();
+    while(walks[d.toDateString()]){s++;d.setDate(d.getDate()-1);}
+    return s;
+  })();
+
+  const totalWalks = Object.keys(walks).length;
+
+  const toggle = (key) => setState(s=>{
+    const w={...(s.walks||{})};
+    if(w[key]) delete w[key]; else w[key]=true;
+    return {...s,walks:w};
+  });
+
+  return (
+    <div style={{paddingBottom:20}}>
+      <div style={{padding:"28px 20px 0"}}>
+        <Tag>3x per week · fat loss baseline</Tag>
+        <p style={{fontSize:14,lineHeight:1.7,color:C.muted}}>Walking 3 consistent days gives us clean data. When progress stalls — that's when we add more. For now: hold the line and let the numbers talk.</p>
+      </div>
+      <div style={{padding:"20px 20px 0"}}>
+        <div style={s.card}>
+          <div style={{display:"flex",alignItems:"center",gap:12,background:C.cream,borderRadius:10,padding:"12px 14px",marginBottom:14}}>
+            <div style={{fontFamily:"Georgia,serif",fontSize:36,color:C.amber,lineHeight:1}}>{streak}</div>
+            <div>
+              <div style={{fontSize:14,fontWeight:500,color:C.deep}}>{streak===0?"Start your streak":streak===1?"1 day streak":`${streak} day streak`}</div>
+              <div style={{fontSize:12,color:C.muted}}>{totalWalks} total walks logged</div>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4,marginBottom:14}}>
+            {weekDays.map(d=>(
+              <div key={d.key} onClick={()=>toggle(d.key)} style={{aspectRatio:1,borderRadius:8,background:walks[d.key]?C.sage:C.soft,border:d.today?`1.5px solid ${C.amber}`:"1.5px solid transparent",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",transition:"all 0.2s"}}>
+                <div style={{fontSize:9,letterSpacing:"0.05em",textTransform:"uppercase",color:walks[d.key]?"rgba(255,255,255,0.75)":C.muted}}>{d.label}</div>
+                {walks[d.key]&&<div style={{fontSize:12,color:"white"}}>✓</div>}
+              </div>
+            ))}
+          </div>
+          <button onClick={()=>toggle(todayKey)} style={{...s.actionBtn,background:walkedToday?C.sage:C.deep}}>{walkedToday?"✓ Walked Today — Nice.":"Log Today's Walk"}</button>
+        </div>
+
+        <div style={{...s.blockLabel,marginBottom:12}}>Why this works<div style={{flex:1,height:1,background:C.soft}}/></div>
+        <InfoCard title="🔥 Visceral fat comes off first">Your visceral fat index went from 18 to 17 in 6 weeks. Consistent walking — especially fasted — directly targets this. Keep going.</InfoCard>
+        <InfoCard title="📊 Clean data = smart decisions">By holding 3 walks/week steady, we know exactly what's working. If progress slows, we add a walk before we touch calories. One lever at a time.</InfoCard>
+        <InfoCard title="💪 Walking doesn't touch muscle">Zone 2 walking burns fat without touching your muscle tissue. Your strength training builds it — your walks burn fat around it. They work together.</InfoCard>
+        <InfoCard title="🧠 Cortisol + body composition">You're running a business on your own. Your schedule is full. A quiet morning walk lowers cortisol rather than spiking it. That matters more than people realize for fat loss.</InfoCard>
+      </div>
+    </div>
+  );
+}
+
+// ── SOLO WORKOUTS DATA ────────────────────────────
+const SOLO_WORKOUTS = [
+  {
+    id:"dayC", label:"Day C", sublabel:"Upper Body", day:"Wed / Thu",
+    title:"Upper Body — Gym Only",
+    subtitle:"Barbell first · Dumbbells · Cables at the end. Nothing repeated from Monday.",
+    duration:"~45 min", note:"Set up at the barbell, move to DBs, finish all cables together — no jumping around.",
+    blocks:[
+      { name:"Barbell", exercises:[
+        { name:"Barbell Row", sets:"3x12", cue:"Chest supported or inverted. Pull bar to lower ribs, squeeze shoulder blades at the top. Full stretch at the bottom." },
+      ]},
+      { name:"Dumbbells", exercises:[
+        { name:"DB Pullover", sets:"3x12", cue:"Lats and chest — full overhead stretch. Feel the lats open at the bottom before pulling back." },
+        { name:"DB Arnold Press", sets:"3x12", cue:"Rotate through the full range — start palms facing you, finish palms forward. Shoulder definition lives here." },
+        { name:"DB Zottman Curl", sets:"3x12", cue:"Curl up supinated (palms up), lower pronated (palms down). Hits both heads of the bicep and the forearm. Slow on the way down." },
+      ]},
+      { name:"Cables — stay here until you're done", exercises:[
+        { name:"Cable Chest Press", sets:"4x12", cue:"Full range — feel the pec stretch at the bottom. Squeeze hard at the top. Different tension than DBs." },
+        { name:"Cable Chest Fly", sets:"3x15", cue:"2-sec stretch at the bottom — arms wide, chest opens fully. Squeeze at the top. This is where chest shape is built." },
+        { name:"Single Arm Cable Pulldown", sets:"4x12/side", cue:"Elbow drives to hip — full lat engagement. Full stretch at the top before every rep." },
+        { name:"Cable Lateral Raise", sets:"3x15/side", cue:"Single arm — constant tension on the delt the whole rep. No momentum." },
+        { name:"Tricep Cable Pushdown", sets:"3x15", cue:"Elbows pinned to your sides. Squeeze hard at the bottom. Slow return." },
+      ]},
+    ],
+  },
+  {
+    id:"dayD", label:"Day D", sublabel:"Glute Growth", day:"Wed / Thu",
+    title:"Glute Growth",
+    subtitle:"Upper shelf · lower sweep · side shelf · deep stretch. Every angle. This is the birthday session.",
+    duration:"~50 min", note:"This is the most important solo day. Do not skip it.",
+    blocks:[
+      { name:"Warm-Up", exercises:[
+        { name:"Banded Glute Bridge", sets:"2x20", cue:"Band above knees, drive knees out. Activate before you load. Don't skip this — it makes everything else work better." },
+      ]},
+      { name:"Main glute work", exercises:[
+        { name:"Single Leg BB Hip Thrust", sets:"4x10/side", cue:"Drive through heel — 2-sec hold and squeeze at the top. Full lockout every rep. This builds the upper shelf." },
+        { name:"Cable Kickback — High Cable", sets:"3x15/side", cue:"Full hip extension — squeeze upper glute hard at the top. Slow controlled return. Feel the upper glute max working." },
+        { name:"Cable Step Up / Step Down", sets:"3x12/side", cue:"Cable at ankle. Step up slow, lower controlled. The cable adds constant tension that a bodyweight step-up doesn't have." },
+        { name:"Deficit Elevated Sumo Squat", sets:"4x12", cue:"Plates under feet — deep stretch at the bottom. Drive knees out. This deep range is where glute growth happens." },
+        { name:"B-Stance RDL", sets:"3x10/side", cue:"3-sec lower — feel the hamstring and lower glute stretch. Back foot is just for balance. Drive hips through at the top." },
+        { name:"Feet Elevated Single Leg Bridge", sets:"3x15/side", cue:"Foot on bench — drive hips up, squeeze hard at the top. Full lockout. Works the glute at a longer muscle length." },
+        { name:"Seated Hip Abduction", sets:"3x20", cue:"Slow tempo — constant tension on glute med the whole set. This is the side shelf. Do not rush it." },
+      ]},
+    ],
+  },
+  {
+    id:"dayE", label:"Day E", sublabel:"Full Body", day:"Fri / Sat",
+    title:"Full Body — Fit In When You Can",
+    subtitle:"Something always beats nothing. 35 minutes and you're done.",
+    duration:"~35 min", note:"When life is busy — this one. Show up, do the work, go live your life.",
+    blocks:[
+      { name:"Lower body", exercises:[
+        { name:"Banded Hip Thrust", sets:"3x20", cue:"Band above knees, slow pulse at the top. Light load, high reps — metabolic stress on the glutes." },
+        { name:"Goblet Squat — Heels Elevated", sets:"3x12", cue:"Pause at the bottom, drive knees out. Heels on plates — increases glute activation." },
+        { name:"Cable Kickback", sets:"3x15/side", cue:"Full extension — upper glute max. Squeeze and hold for a beat at the top." },
+      ]},
+      { name:"Upper body", exercises:[
+        { name:"Cable Chest Press", sets:"3x12", cue:"Full range — different feel from DB work with Christin. Stay at the cables." },
+        { name:"Single Arm Cable Pulldown", sets:"3x12/side", cue:"Elbow to hip, full lat stretch at the top." },
+      ]},
+      { name:"Core", exercises:[
+        { name:"Step Up w/ High Knee Drive", sets:"3x12/side", cue:"Drive knee high — this builds the glute shelf. Push through the working heel, not the toes." },
+        { name:"Dead Bug", sets:"3x8/side", cue:"Lower back flat the entire time. Slow and controlled. Opposite arm and leg extend together." },
+      ]},
+    ],
+  },
+  {
+    id:"quickUpper", label:"Quick", sublabel:"Upper", day:"Any day",
+    title:"Quick Upper Body",
+    subtitle:"20 minutes. Pair with 20 min cardio. Done.",
+    duration:"~20 min", note:"Time is tight. This still counts. Show up.",
+    blocks:[
+      { name:"20 min circuit", exercises:[
+        { name:"Cable Chest Press", sets:"3x12", cue:"Full range, feel the pec." },
+        { name:"Single Arm Cable Pulldown", sets:"3x12/side", cue:"Elbow drives to hip." },
+        { name:"DB Arnold Press", sets:"3x10", cue:"Rotate through full range." },
+        { name:"DB Zottman Curl", sets:"2x12", cue:"Slow on the way down." },
+        { name:"Tricep Cable Pushdown", sets:"2x15", cue:"Elbows pinned, squeeze at bottom." },
+      ]},
+    ],
+  },
+  {
+    id:"quickLower", label:"Quick", sublabel:"Lower", day:"Any day",
+    title:"Quick Glute Focus",
+    subtitle:"20 minutes. Pair with 20 min cardio. June 8 is coming.",
+    duration:"~20 min", note:"Even on the short days — the glutes get work.",
+    blocks:[
+      { name:"20 min circuit", exercises:[
+        { name:"Banded Hip Thrust", sets:"3x20", cue:"Band above knees — squeeze hard at the top." },
+        { name:"Cable Kickback", sets:"3x15/side", cue:"Full extension — upper shelf." },
+        { name:"Deficit Elevated Sumo Squat", sets:"3x12", cue:"Deep stretch — drive knees out." },
+        { name:"Feet Elevated Single Leg Bridge", sets:"2x15/side", cue:"Foot on bench — squeeze at top." },
+        { name:"Seated Hip Abduction", sets:"2x20", cue:"Slow tempo — glute med burn." },
+      ]},
+    ],
+  },
+];
+
+function SoloExBlock({ exercises, checked, weights, onToggle, onWeightChange, prefix }) {
+  const [expanded, setExpanded] = useState(null);
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+      {exercises.map((ex,i)=>{
+        const key=`${prefix}-${i}`;
+        const done=checked[key];
+        const open=expanded===key;
+        const wt=weights[key]||"";
+        return (
+          <div key={key} style={{background:C.warm,border:`1px solid ${C.soft}`,borderRadius:14,overflow:"hidden",position:"relative",opacity:done?0.6:1,transition:"opacity 0.2s"}}>
+            <div style={{position:"absolute",left:0,top:0,bottom:0,width:3,background:done?C.sage:C.soft}}/>
+            <div onClick={()=>setExpanded(open?null:key)} style={{display:"flex",alignItems:"flex-start",padding:"12px 14px 12px 20px",gap:10,cursor:"pointer"}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:500,color:C.deep,lineHeight:1.3}}>{ex.name}</div>
+                <div style={{fontSize:12,color:C.amber,fontWeight:500,marginTop:2}}>{ex.sets}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+                <input
+                  type="number"
+                  placeholder="lbs"
+                  value={wt}
+                  onClick={e=>e.stopPropagation()}
+                  onChange={e=>{e.stopPropagation();onWeightChange(key,e.target.value);}}
+                  style={{width:58,background:C.cream,border:`1px solid ${C.soft}`,borderRadius:8,padding:"5px 8px",fontFamily:"inherit",fontSize:13,color:C.deep,textAlign:"center"}}
+                />
+                <div onClick={e=>{e.stopPropagation();onToggle(key);}} style={{width:28,height:28,borderRadius:"50%",border:`1.5px solid ${done?C.sage:C.soft}`,background:done?C.sage:C.cream,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:done?"white":"transparent",cursor:"pointer",transition:"all 0.2s"}}>✓</div>
+              </div>
+            </div>
+            {open&&<div style={{padding:"8px 14px 12px 20px",borderTop:`1px solid ${C.soft}`,fontSize:12,lineHeight:1.65,color:C.muted}}>{ex.cue}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+  );
+}
+
+function SoloTab({ state, setState }) {
+  const [activeWo, setActiveWo] = useState("dayD");
+  const checked = state.soloChecked || {};
+  const weights = state.soloWeights || {};
+
+  const toggleEx = (key) => setState(s=>{
+    const sc={...(s.soloChecked||{})};
+    sc[key]=!sc[key];
+    return {...s,soloChecked:sc};
+  });
+
+  const setWeight = (key, val) => setState(s=>({...s, soloWeights:{...(s.soloWeights||{}),[key]:val}}));
+
+  const wo = SOLO_WORKOUTS.find(w=>w.id===activeWo);
+  const allEx = wo.blocks.flatMap(b=>b.exercises);
+  const doneCount = allEx.filter((_,i)=>checked[`${activeWo}-${wo.blocks.findIndex(b=>b.exercises.includes(allEx[i]))}-${i}`]).length;
+
+  let globalIdx = 0;
+
+  return (
+    <div style={{paddingBottom:20}}>
+      <div style={{padding:"20px 20px 0"}}>
+        <div style={{fontSize:11,letterSpacing:"0.12em",textTransform:"uppercase",color:C.muted,marginBottom:10}}>Weekly schedule</div>
+        {[["Mon","With Christin","Upper Body + Core"],["Tue","With Christin","Glutes + Lower Body"],["Wed/Thu","Solo","Day D — Glute Growth"],["Fri/Sat","Solo","Day C or E"],["Sun","Rest","Or a walk"]].map(([day,who,focus],i)=>(
+          <div key={i} style={{display:"flex",gap:12,padding:"7px 0",borderBottom:`1px solid ${C.soft}`}}>
+            <div style={{fontSize:12,fontWeight:500,color:C.deep,width:52,flexShrink:0}}>{day}</div>
+            <div style={{fontSize:11,background:who==="With Christin"?"#e8f0e4":who==="Solo"?C.soft:C.cream,color:who==="With Christin"?C.darkSage:C.muted,padding:"2px 8px",borderRadius:10,alignSelf:"center",flexShrink:0}}>{who}</div>
+            <div style={{fontSize:12,color:C.muted}}>{focus}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{padding:"18px 20px 0",display:"flex",gap:6,flexWrap:"wrap"}}>
+        {SOLO_WORKOUTS.map(w=>(
+          <div key={w.id} onClick={()=>setActiveWo(w.id)} style={{background:w.id===activeWo?C.deep:C.warm,border:`1.5px solid ${w.id===activeWo?C.deep:C.soft}`,borderRadius:12,padding:"8px 12px",textAlign:"center",cursor:"pointer",transition:"all 0.2s",flexShrink:0}}>
+            <div style={{fontSize:12,fontWeight:500,color:w.id===activeWo?C.cream:C.deep,lineHeight:1.2}}>{w.label}</div>
+            <div style={{fontSize:10,color:w.id===activeWo?C.taupe:C.muted}}>{w.sublabel}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{padding:"16px 20px 0"}}>
+        <div style={{fontFamily:"Georgia,serif",fontSize:22,color:C.deep}}>{wo.title}</div>
+        <div style={{fontSize:13,color:C.muted,marginTop:4,lineHeight:1.5,marginBottom:8}}>{wo.subtitle}</div>
+        <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+          <span style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",background:C.soft,color:C.muted,padding:"3px 10px",borderRadius:20}}>{wo.duration}</span>
+          <span style={{fontSize:10,letterSpacing:"0.1em",textTransform:"uppercase",background:"#e8f0e4",color:C.darkSage,padding:"3px 10px",borderRadius:20}}>{wo.day}</span>
+        </div>
+        {wo.note && <div style={{background:C.cream,borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:12,color:C.muted,lineHeight:1.5,borderLeft:`3px solid ${C.amber}`}}>{wo.note}</div>}
+
+        {wo.blocks.map((block,bi)=>{
+          const prefix = `${activeWo}-b${bi}`;
+          return (
+            <div key={bi} style={{marginBottom:16}}>
+              <div style={{...s.blockLabel,marginBottom:10}}>
+                {block.name}
+                <div style={{flex:1,height:1,background:C.soft}}/>
+              </div>
+              <SoloExBlock exercises={block.exercises} checked={checked} weights={weights} onToggle={toggleEx} onWeightChange={setWeight} prefix={prefix}/>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────
+const TABS = ["Morning","Nutrition","Solo","Walk","Progress"];
+
+function App() {
+  const [tab, setTab] = useState("Morning");
+  const [appState, setAppState] = useState(()=>{
+    const loaded = loadState();
+    const todayKey = new Date().toDateString();
+    if(loaded.lastDay !== todayKey){
+      loaded.ritual={};
+      loaded.dailyHabits={};
+      loaded.todayNutrition={};
+      loaded.trainingChecked={};
+      loaded.soloChecked={};
+      loaded.lastDay=todayKey;
+    }
+    return loaded;
+  });
+
+  const setState = useCallback((updater)=>{
+    setAppState(prev=>{
+      const next = typeof updater==="function"?updater(prev):updater;
+      saveState(next);
+      return next;
+    });
+  },[]);
+
+  const todayStr = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+
+  return (
+    <div style={{background:C.cream,minHeight:"100vh",fontFamily:"'DM Sans',system-ui,sans-serif",color:C.deep,maxWidth:480,margin:"0 auto"}}>
+      <div style={{padding:"36px 20px 24px",borderBottom:`1px solid ${C.soft}`}}>
+        <div style={{fontSize:11,letterSpacing:"0.2em",textTransform:"uppercase",color:C.muted,marginBottom:8}}>Feminine Strength · Brielle</div>
+        <div style={{fontFamily:"Georgia,serif",fontSize:28,fontWeight:400,lineHeight:1.2,color:C.deep}}>
+          Show up for <em style={{fontStyle:"italic",color:C.sage}}>yourself</em> — before the world.
+        </div>
+        <div style={{marginTop:6,fontSize:13,color:C.muted,fontWeight:300}}>{todayStr}</div>
+      </div>
+
+      <div style={{display:"flex",overflowX:"auto",borderBottom:`1px solid ${C.soft}`,scrollbarWidth:"none",padding:"0 20px"}}>
+        {TABS.map(t=>(
+          <button key={t} onClick={()=>setTab(t)} style={{background:"none",border:"none",padding:"12px 0 14px",marginRight:20,fontFamily:"inherit",fontSize:13,fontWeight:tab===t?500:400,color:tab===t?C.deep:C.muted,cursor:"pointer",whiteSpace:"nowrap",position:"relative",flexShrink:0}}>
+            {t}
+            {tab===t&&<div style={{position:"absolute",bottom:0,left:0,right:0,height:2,background:C.sage}}/>}
+          </button>
+        ))}
+      </div>
+
+      {tab==="Morning"&&<MorningTab state={appState} setState={setState}/>}
+      {tab==="Nutrition"&&<NutritionTab state={appState} setState={setState}/>}
+      {tab==="Solo"&&<SoloTab state={appState} setState={setState}/>}
+      {tab==="Walk"&&<WalkTab state={appState} setState={setState}/>}
+      {tab==="Progress"&&<ProgressTab state={appState} setState={setState}/>}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
+</script>
+</body>
+</html>
